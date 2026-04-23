@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Álbum del Mundial 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1b2a;
+      color: #e2e8f0;
+      margin: 0;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+    .main-wrap { max-width: 600px; margin: 0 auto; }
+    .app-header {
+      background: linear-gradient(135deg, #1a3550, #0d2137);
+      padding: 18px 16px 14px;
+      text-align: center;
+      border-bottom: 2px solid rgba(255,215,0,0.25);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .app-header h1 { font-size: 1.4rem; font-weight: 800; color: #ffd700; margin: 0 0 3px; }
+    .app-header p { font-size: 0.78rem; color: rgba(255,255,255,0.5); margin: 0; }
+    .stats-section {
+      padding: 12px 16px 10px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .stats-row { display: flex; justify-content: space-around; margin-bottom: 8px; }
+    .stat-item { text-align: center; }
+    .stat-number { font-size: 1.4rem; font-weight: 700; display: block; }
+    .stat-label { font-size: 0.65rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.05em; }
+    #si-collected .stat-number { color: #4ade80; }
+    #si-missing .stat-number { color: #fb923c; }
+    #si-total .stat-number { color: #60a5fa; }
+    .progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
+    .progress-fill {
+      height: 100%; background: linear-gradient(90deg, #22c55e, #86efac);
+      border-radius: 99px; transition: width 0.4s ease; width: 0%;
+    }
+    .controls-section {
+      padding: 10px 12px;
+      display: flex; gap: 8px; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    #search-input {
+      flex: 1; background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+      color: #e2e8f0; font-size: 0.9rem; padding: 8px 12px; outline: none;
+    }
+    #search-input:focus { border-color: #ffd700; }
+    #search-input::placeholder { color: rgba(255,255,255,0.3); }
+    .filters { display: flex; gap: 4px; }
+    .filter-btn {
+      padding: 7px 10px; border-radius: 6px; border: none;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .filter-btn.active { background: #ffd700; color: #1a1a1a; }
+    .filter-btn:not(.active) { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+    .section-title {
+      padding: 14px 16px 6px; font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em; color: #ffd700;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,215,0,0.15); }
+    .team-card {
+      margin: 4px 12px; background: rgba(255,255,255,0.04);
+      border-radius: 10px; border: 1px solid rgba(255,255,255,0.07); overflow: hidden;
+    }
+    .team-card[data-complete="true"] { border-color: rgba(74,222,128,0.3); }
+    .team-toggle {
+      display: flex; align-items: center; padding: 11px 14px; cursor: pointer;
+      gap: 10px; -webkit-tap-highlight-color: transparent; user-select: none;
+    }
+    .team-flag { font-size: 1.3rem; width: 30px; text-align: center; }
+    .team-info { flex: 1; min-width: 0; }
+    .team-name { font-size: 0.9rem; font-weight: 600; }
+    .team-progress-text { font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .team-mini-bar-wrap { width: 42px; }
+    .team-mini-bar { height: 3px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; margin-bottom: 2px; }
+    .team-mini-fill { height: 100%; background: #4ade80; border-radius: 99px; transition: width 0.3s; }
+    .team-pct { font-size: 0.6rem; color: rgba(255,255,255,0.3); text-align: right; }
+    .team-chevron { color: rgba(255,255,255,0.25); font-size: 0.65rem; transition: transform 0.2s; }
+    .team-card.open .team-chevron { transform: rotate(180deg); }
+    .stickers-panel { padding: 0 12px 12px; display: none; }
+    .team-card.open .stickers-panel { display: block; }
+    .select-btns { display: flex; gap: 6px; margin-bottom: 8px; }
+    .mini-btn {
+      padding: 4px 10px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); font-size: 0.7rem; cursor: pointer;
+    }
+    .stickers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 5px; }
+    .sticker-btn {
+      border-radius: 7px; border: 1.5px solid transparent; padding: 6px 3px 5px;
+      text-align: center; cursor: pointer; transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent; outline: none;
+    }
+    .sticker-btn.missing { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.08); }
+    .sticker-btn.collected { background: rgba(74,222,128,0.12); border-color: #4ade80; }
+    .sticker-btn:active { transform: scale(0.9); }
+    .sticker-num { display: block; font-size: 0.8rem; font-weight: 700; }
+    .sticker-btn.missing .sticker-num { color: rgba(255,255,255,0.45); }
+    .sticker-btn.collected .sticker-num { color: #4ade80; }
+    .sticker-label { display: block; font-size: 0.52rem; margin-top: 1px; line-height: 1.2; color: rgba(255,255,255,0.3); }
+    .sticker-btn.collected .sticker-label { color: rgba(74,222,128,0.55); }
+    .empty-msg { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.3); font-size: 0.9rem; }
+    .app-footer { margin-top: 28px; padding: 0 16px; text-align: center; }
+    .reset-btn {
+      background: none; border: 1px solid rgba(239,68,68,0.35);
+      color: rgba(239,68,68,0.65); border-radius: 8px; padding: 10px 20px;
+      cursor: pointer; font-size: 0.82rem;
+    }
+    .reset-btn:active { background: rgba(239,68,68,0.1); }
+  </style>
+</head>
+<body>
+<div class="main-wrap">
+  <header class="app-header">
+    <h1>🏆 Mi Álbum del Mundial 2026</h1>
+    <p>Tocá cada figurita cuando la conseguís — se guarda automáticamente</p>
+  </header>
+
+  <section class="stats-section">
+    <div class="stats-row">
+      <div class="stat-item" id="si-collected"><span class="stat-number">0</span><span class="stat-label">Tengo</span></div>
+      <div class="stat-item" id="si-missing"><span class="stat-number">0</span><span class="stat-label">Me faltan</span></div>
+      <div class="stat-item" id="si-total"><span class="stat-number">0</span><span class="stat-label">Total</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </section>
+
+  <div class="controls-section">
+    <input type="search" id="search-input" placeholder="Buscar equipo..." autocomplete="off">
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">Todo</button>
+      <button class="filter-btn" data-filter="incomplete">Faltan</button>
+      <button class="filter-btn" data-filter="complete">Listas ✓</button>
+    </div>
+  </div>
+
+  <div id="app-body"></div>
+
+  <div class="app-footer">
+    <button class="reset-btn" id="reset-btn">Reiniciar álbum desde cero</button>
+  </div>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+function mkStickers(start) {
+  const s = [];
+  s.push({ id: '' + start,       label: 'Escudo' });
+  s.push({ id: '' + (start + 1), label: 'Equipo' });
+  for (let i = 1; i <= 11; i++)
+    s.push({ id: '' + (start + 1 + i), label: 'Jug.' + i });
+  return s; // 13 stickers: start..start+12
+}
+
+const FWC_LABELS = [
+  'Logo','Mascota','Trofeo','Balón','Álbum','CDMX','Guadalajara','Monterrey',
+  'Los Ángeles','San Francisco','Dallas','Seattle',
+  'New York','Houston','Boston','Miami',
+  'Atlanta','Kansas City','Vancouver','Toronto','Calgary','Ceremonia'
+];
+
+const SECTIONS = [
+  { id:'intro', name:'⭐ Introducción', teams:[
+    { id:'fwc', name:'Especiales FWC', flag:'🌍',
+      stickers: FWC_LABELS.map((lbl,i) => ({ id:'FWC'+(i+1), label:lbl })) }
+  ]},
+  { id:'uefa', name:'🔵 UEFA', teams:[
+    { id:'ger', name:'Alemania',      flag:'🇩🇪', stickers:mkStickers(1)   },
+    { id:'alb', name:'Albania',       flag:'🇦🇱', stickers:mkStickers(14)  },
+    { id:'aut', name:'Austria',       flag:'🇦🇹', stickers:mkStickers(27)  },
+    { id:'bel', name:'Bélgica',       flag:'🇧🇪', stickers:mkStickers(40)  },
+    { id:'cro', name:'Croacia',       flag:'🇭🇷', stickers:mkStickers(53)  },
+    { id:'den', name:'Dinamarca',     flag:'🇩🇰', stickers:mkStickers(66)  },
+    { id:'sco', name:'Escocia',       flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', stickers:mkStickers(79)  },
+    { id:'esp', name:'España',        flag:'🇪🇸', stickers:mkStickers(92)  },
+    { id:'fra', name:'Francia',       flag:'🇫🇷', stickers:mkStickers(105) },
+    { id:'eng', name:'Inglaterra',    flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', stickers:mkStickers(118) },
+    { id:'ned', name:'Países Bajos',  flag:'🇳🇱', stickers:mkStickers(131) },
+    { id:'por', name:'Portugal',      flag:'🇵🇹', stickers:mkStickers(144) },
+    { id:'cze', name:'Rep. Checa',    flag:'🇨🇿', stickers:mkStickers(157) },
+    { id:'srb', name:'Serbia',        flag:'🇷🇸', stickers:mkStickers(170) },
+    { id:'sui', name:'Suiza',         flag:'🇨🇭', stickers:mkStickers(183) },
+    { id:'tur', name:'Turquía',       flag:'🇹🇷', stickers:mkStickers(196) },
+  ]},
+  { id:'conmebol', name:'🔴 CONMEBOL', teams:[
+    { id:'arg', name:'Argentina', flag:'🇦🇷', stickers:mkStickers(209) },
+    { id:'bra', name:'Brasil',    flag:'🇧🇷', stickers:mkStickers(222) },
+    { id:'col', name:'Colombia',  flag:'🇨🇴', stickers:mkStickers(235) },
+    { id:'ecu', name:'Ecuador',   flag:'🇪🇨', stickers:mkStickers(248) },
+    { id:'uru', name:'Uruguay',   flag:'🇺🇾', stickers:mkStickers(261) },
+    { id:'ven', name:'Venezuela', flag:'🇻🇪', stickers:mkStickers(274) },
+  ]},
+  { id:'concacaf', name:'🟢 CONCACAF', teams:[
+    { id:'can', name:'Canadá',         flag:'🇨🇦', stickers:mkStickers(287) },
+    { id:'usa', name:'Estados Unidos', flag:'🇺🇸', stickers:mkStickers(300) },
+    { id:'hon', name:'Honduras',       flag:'🇭🇳', stickers:mkStickers(313) },
+    { id:'jam', name:'Jamaica',        flag:'🇯🇲', stickers:mkStickers(326) },
+    { id:'mex', name:'México',         flag:'🇲🇽', stickers:mkStickers(339) },
+    { id:'pan', name:'Panamá',         flag:'🇵🇦', stickers:mkStickers(352) },
+  ]},
+  { id:'caf', name:'🟡 CAF (África)', teams:[
+    { id:'alg', name:'Argelia',          flag:'🇩🇿', stickers:mkStickers(365) },
+    { id:'cmr', name:'Camerún',          flag:'🇨🇲', stickers:mkStickers(378) },
+    { id:'civ', name:'Costa de Marfil',  flag:'🇨🇮', stickers:mkStickers(391) },
+    { id:'egy', name:'Egipto',           flag:'🇪🇬', stickers:mkStickers(404) },
+    { id:'gha', name:'Ghana',            flag:'🇬🇭', stickers:mkStickers(417) },
+    { id:'mar', name:'Marruecos',        flag:'🇲🇦', stickers:mkStickers(430) },
+    { id:'nga', name:'Nigeria',          flag:'🇳🇬', stickers:mkStickers(443) },
+    { id:'sen', name:'Senegal',          flag:'🇸🇳', stickers:mkStickers(456) },
+    { id:'tun', name:'Túnez',            flag:'🇹🇳', stickers:mkStickers(469) },
+  ]},
+  { id:'afc', name:'🟠 AFC (Asia)', teams:[
+    { id:'ksa', name:'Arabia Saudita', flag:'🇸🇦', stickers:mkStickers(482) },
+    { id:'aus', name:'Australia',      flag:'🇦🇺', stickers:mkStickers(495) },
+    { id:'kor', name:'Corea del Sur',  flag:'🇰🇷', stickers:mkStickers(508) },
+    { id:'idn', name:'Indonesia',      flag:'🇮🇩', stickers:mkStickers(521) },
+    { id:'irn', name:'Irán',           flag:'🇮🇷', stickers:mkStickers(534) },
+    { id:'jpn', name:'Japón',          flag:'🇯🇵', stickers:mkStickers(547) },
+    { id:'jor', name:'Jordania',       flag:'🇯🇴', stickers:mkStickers(560) },
+    { id:'uzb', name:'Uzbekistán',     flag:'🇺🇿', stickers:mkStickers(573) },
+  ]},
+  { id:'ofc', name:'🌊 OFC / Playoffs', teams:[
+    { id:'chi', name:'Chile',         flag:'🇨🇱', stickers:mkStickers(586) },
+    { id:'crc', name:'Costa Rica',    flag:'🇨🇷', stickers:mkStickers(599) },
+    { id:'nzl', name:'Nueva Zelanda', flag:'🇳🇿', stickers:mkStickers(612) },
+  ]},
+];
+
+// Sticker → team lookup map (precomputed)
+const stickerMap = {};
+for (const sec of SECTIONS)
+  for (const team of sec.teams)
+    for (const st of team.stickers)
+      stickerMap[st.id] = { sec, team };
+
+const ALL_IDS = Object.keys(stickerMap);
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+const STORAGE_KEY = 'album-mundial-2026-v1';
+let collected = {};
+let openTeams = new Set();
+let currentFilter = 'all';
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) collected = JSON.parse(raw).collected || {};
+  } catch(e) { collected = {}; }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ collected })); } catch(e) {}
+}
+
+// ─── STATS ───────────────────────────────────────────────────────────────────
+
+function updateStats() {
+  const total = ALL_IDS.length;
+  const got = ALL_IDS.filter(id => collected[id]).length;
+  const miss = total - got;
+  document.querySelector('#si-collected .stat-number').textContent = got;
+  document.querySelector('#si-missing .stat-number').textContent = miss;
+  document.querySelector('#si-total .stat-number').textContent = total;
+  document.getElementById('progress-fill').style.width = (total ? (got/total*100).toFixed(1) : 0) + '%';
+}
+
+function teamStats(team) {
+  const total = team.stickers.length;
+  const done = team.stickers.filter(s => collected[s.id]).length;
+  return { total, done, pct: total ? Math.round(done/total*100) : 0 };
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+function buildTeamCard(sec, team) {
+  const { total, done, pct } = teamStats(team);
+  const isOpen = openTeams.has(team.id);
+  const complete = done === total;
+
+  const card = document.createElement('div');
+  card.className = 'team-card' + (isOpen ? ' open' : '');
+  card.dataset.teamId = team.id;
+  if (complete) card.dataset.complete = 'true';
+
+  // Header
+  const toggle = document.createElement('div');
+  toggle.className = 'team-toggle';
+  toggle.innerHTML = `
+    <span class="team-flag">${team.flag}</span>
+    <div class="team-info">
+      <div class="team-name">${team.name}</div>
+      <div class="team-progress-text">${done}/${total} figuritas</div>
+    </div>
+    <div class="team-mini-bar-wrap">
+      <div class="team-mini-bar"><div class="team-mini-fill" style="width:${pct}%"></div></div>
+      <div class="team-pct">${pct}%</div>
+    </div>
+    <span class="team-chevron">▼</span>
+  `;
+  toggle.addEventListener('click', () => toggleTeam(team.id));
+  card.appendChild(toggle);
+
+  // Stickers panel
+  const panel = document.createElement('div');
+  panel.className = 'stickers-panel';
+
+  const selBtns = document.createElement('div');
+  selBtns.className = 'select-btns';
+  selBtns.innerHTML = `
+    <button class="mini-btn">✓ Marcar todas</button>
+    <button class="mini-btn">✗ Desmarcar</button>
+  `;
+  selBtns.children[0].addEventListener('click', e => { e.stopPropagation(); markAll(team.id, true); });
+  selBtns.children[1].addEventListener('click', e => { e.stopPropagation(); markAll(team.id, false); });
+  panel.appendChild(selBtns);
+
+  const grid = document.createElement('div');
+  grid.className = 'stickers-grid';
+  grid.dataset.gridTeam = team.id;
+  for (const st of team.stickers) {
+    const btn = document.createElement('button');
+    btn.className = 'sticker-btn ' + (collected[st.id] ? 'collected' : 'missing');
+    btn.dataset.stickerId = st.id;
+    btn.innerHTML = `<span class="sticker-num">${st.id}</span><span class="sticker-label">${st.label}</span>`;
+    btn.addEventListener('click', () => toggleSticker(st.id));
+    grid.appendChild(btn);
+  }
+  panel.appendChild(grid);
+  card.appendChild(panel);
+  return card;
+}
+
+function render() {
+  const container = document.getElementById('app-body');
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  container.innerHTML = '';
+  let any = false;
+
+  for (const sec of SECTIONS) {
+    let teams = sec.teams;
+    if (q) teams = teams.filter(t => t.name.toLowerCase().includes(q));
+    if (currentFilter === 'incomplete') teams = teams.filter(t => { const {done,total} = teamStats(t); return done < total; });
+    if (currentFilter === 'complete')   teams = teams.filter(t => { const {done,total} = teamStats(t); return done === total; });
+    if (!teams.length) continue;
+    any = true;
+
+    const secEl = document.createElement('div');
+    const title = document.createElement('div');
+    title.className = 'section-title';
+    title.textContent = sec.name;
+    secEl.appendChild(title);
+    for (const team of teams) secEl.appendChild(buildTeamCard(sec, team));
+    container.appendChild(secEl);
+  }
+
+  if (!any) container.innerHTML = '<div class="empty-msg">No se encontraron equipos.</div>';
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+
+function toggleTeam(teamId) {
+  openTeams.has(teamId) ? openTeams.delete(teamId) : openTeams.add(teamId);
+  const card = document.querySelector(`[data-team-id="${teamId}"]`);
+  if (card) card.classList.toggle('open', openTeams.has(teamId));
+}
+
+function patchTeamCard(teamId) {
+  const card = document.querySelector(`[data-team-id="${teamId}"]`);
+  if (!card) return;
+  const info = stickerMap[Object.keys(stickerMap).find(id => stickerMap[id].team.id === teamId)];
+  if (!info) return;
+  const { total, done, pct } = teamStats(info.team);
+  card.querySelector('.team-progress-text').textContent = `${done}/${total} figuritas`;
+  card.querySelector('.team-mini-fill').style.width = pct + '%';
+  card.querySelector('.team-pct').textContent = pct + '%';
+  if (done === total) card.dataset.complete = 'true';
+  else delete card.dataset.complete;
+}
+
+function toggleSticker(id) {
+  collected[id] = !collected[id];
+  saveState();
+  const btn = document.querySelector(`[data-sticker-id="${id}"]`);
+  if (btn) btn.className = 'sticker-btn ' + (collected[id] ? 'collected' : 'missing');
+  patchTeamCard(stickerMap[id].team.id);
+  updateStats();
+}
+
+function markAll(teamId, state) {
+  const info = Object.values(stickerMap).find(v => v.team.id === teamId);
+  if (!info) return;
+  for (const st of info.team.stickers) collected[st.id] = state;
+  saveState();
+  const grid = document.querySelector(`[data-grid-team="${teamId}"]`);
+  if (grid) grid.querySelectorAll('.sticker-btn').forEach(btn => {
+    btn.className = 'sticker-btn ' + (collected[btn.dataset.stickerId] ? 'collected' : 'missing');
+  });
+  patchTeamCard(teamId);
+  updateStats();
+  if (currentFilter !== 'all') render();
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+
+document.getElementById('search-input').addEventListener('input', render);
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+    render();
+  });
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('¿Segura que querés reiniciar todo el álbum?\nSe van a borrar todas las figuritas marcadas.')) {
+    collected = {};
+    saveState();
+    render();
+    updateStats();
+  }
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+loadState();
+render();
+updateStats();
+</script>
+</body>
+</html>
