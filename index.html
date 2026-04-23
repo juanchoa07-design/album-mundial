@@ -151,86 +151,98 @@
 <script>
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
-function mkStickers(start) {
+function mkStickers(teamId) {
   const s = [];
-  s.push({ id: '' + start,       label: 'Escudo' });
-  s.push({ id: '' + (start + 1), label: 'Equipo' });
-  for (let i = 1; i <= 11; i++)
-    s.push({ id: '' + (start + 1 + i), label: 'Jug.' + i });
-  return s; // 13 stickers: start..start+12
+  s.push({ id: teamId + '-1',  num: 1,  label: 'Escudo' });
+  s.push({ id: teamId + '-2',  num: 2,  label: 'Equipo' });
+  for (let i = 1; i <= 18; i++)
+    s.push({ id: teamId + '-' + (i + 2), num: i + 2, label: 'Jug.' + i });
+  return s; // 20 stickers numeradas 1-20
 }
 
 const FWC_LABELS = [
   'Logo','Mascota','Trofeo','Balón','Álbum','CDMX','Guadalajara','Monterrey',
   'Los Ángeles','San Francisco','Dallas','Seattle',
   'New York','Houston','Boston','Miami',
-  'Atlanta','Kansas City','Vancouver','Toronto','Calgary','Ceremonia'
+  'Atlanta','Kansas City','Vancouver','Toronto'
 ];
 
 const SECTIONS = [
   { id:'intro', name:'⭐ Introducción', teams:[
     { id:'fwc', name:'Especiales FWC', flag:'🌍',
-      stickers: FWC_LABELS.map((lbl,i) => ({ id:'FWC'+(i+1), label:lbl })) }
+      stickers: FWC_LABELS.map((_,i) => ({ id:'FWC'+String(i).padStart(2,'0'), num:String(i).padStart(2,'0'), label:'' })) }
   ]},
-  { id:'uefa', name:'🔵 UEFA', teams:[
-    { id:'ger', name:'Alemania',      flag:'🇩🇪', stickers:mkStickers(1)   },
-    { id:'alb', name:'Albania',       flag:'🇦🇱', stickers:mkStickers(14)  },
-    { id:'aut', name:'Austria',       flag:'🇦🇹', stickers:mkStickers(27)  },
-    { id:'bel', name:'Bélgica',       flag:'🇧🇪', stickers:mkStickers(40)  },
-    { id:'cro', name:'Croacia',       flag:'🇭🇷', stickers:mkStickers(53)  },
-    { id:'den', name:'Dinamarca',     flag:'🇩🇰', stickers:mkStickers(66)  },
-    { id:'sco', name:'Escocia',       flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', stickers:mkStickers(79)  },
-    { id:'esp', name:'España',        flag:'🇪🇸', stickers:mkStickers(92)  },
-    { id:'fra', name:'Francia',       flag:'🇫🇷', stickers:mkStickers(105) },
-    { id:'eng', name:'Inglaterra',    flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', stickers:mkStickers(118) },
-    { id:'ned', name:'Países Bajos',  flag:'🇳🇱', stickers:mkStickers(131) },
-    { id:'por', name:'Portugal',      flag:'🇵🇹', stickers:mkStickers(144) },
-    { id:'cze', name:'Rep. Checa',    flag:'🇨🇿', stickers:mkStickers(157) },
-    { id:'srb', name:'Serbia',        flag:'🇷🇸', stickers:mkStickers(170) },
-    { id:'sui', name:'Suiza',         flag:'🇨🇭', stickers:mkStickers(183) },
-    { id:'tur', name:'Turquía',       flag:'🇹🇷', stickers:mkStickers(196) },
+  { id:'grupoA', name:'Grupo A', teams:[
+    { id:'mex', name:'México',        flag:'🇲🇽', stickers:mkStickers('mex') },
+    { id:'rsa', name:'Sudáfrica',     flag:'🇿🇦', stickers:mkStickers('rsa') },
+    { id:'kor', name:'Corea del Sur', flag:'🇰🇷', stickers:mkStickers('kor') },
+    { id:'cze', name:'Rep. Checa',    flag:'🇨🇿', stickers:mkStickers('cze') },
   ]},
-  { id:'conmebol', name:'🔴 CONMEBOL', teams:[
-    { id:'arg', name:'Argentina', flag:'🇦🇷', stickers:mkStickers(209) },
-    { id:'bra', name:'Brasil',    flag:'🇧🇷', stickers:mkStickers(222) },
-    { id:'col', name:'Colombia',  flag:'🇨🇴', stickers:mkStickers(235) },
-    { id:'ecu', name:'Ecuador',   flag:'🇪🇨', stickers:mkStickers(248) },
-    { id:'uru', name:'Uruguay',   flag:'🇺🇾', stickers:mkStickers(261) },
-    { id:'ven', name:'Venezuela', flag:'🇻🇪', stickers:mkStickers(274) },
+  { id:'grupoB', name:'Grupo B', teams:[
+    { id:'can', name:'Canadá',            flag:'🇨🇦', stickers:mkStickers('can') },
+    { id:'qat', name:'Catar',             flag:'🇶🇦', stickers:mkStickers('qat') },
+    { id:'sui', name:'Suiza',             flag:'🇨🇭', stickers:mkStickers('sui') },
+    { id:'bih', name:'Bosnia y Herz.',    flag:'🇧🇦', stickers:mkStickers('bih') },
   ]},
-  { id:'concacaf', name:'🟢 CONCACAF', teams:[
-    { id:'can', name:'Canadá',         flag:'🇨🇦', stickers:mkStickers(287) },
-    { id:'usa', name:'Estados Unidos', flag:'🇺🇸', stickers:mkStickers(300) },
-    { id:'hon', name:'Honduras',       flag:'🇭🇳', stickers:mkStickers(313) },
-    { id:'jam', name:'Jamaica',        flag:'🇯🇲', stickers:mkStickers(326) },
-    { id:'mex', name:'México',         flag:'🇲🇽', stickers:mkStickers(339) },
-    { id:'pan', name:'Panamá',         flag:'🇵🇦', stickers:mkStickers(352) },
+  { id:'grupoC', name:'Grupo C', teams:[
+    { id:'bra', name:'Brasil',    flag:'🇧🇷', stickers:mkStickers('bra') },
+    { id:'mar', name:'Marruecos', flag:'🇲🇦', stickers:mkStickers('mar') },
+    { id:'hai', name:'Haití',     flag:'🇭🇹', stickers:mkStickers('hai') },
+    { id:'sco', name:'Escocia',   flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', stickers:mkStickers('sco') },
   ]},
-  { id:'caf', name:'🟡 CAF (África)', teams:[
-    { id:'alg', name:'Argelia',          flag:'🇩🇿', stickers:mkStickers(365) },
-    { id:'cmr', name:'Camerún',          flag:'🇨🇲', stickers:mkStickers(378) },
-    { id:'civ', name:'Costa de Marfil',  flag:'🇨🇮', stickers:mkStickers(391) },
-    { id:'egy', name:'Egipto',           flag:'🇪🇬', stickers:mkStickers(404) },
-    { id:'gha', name:'Ghana',            flag:'🇬🇭', stickers:mkStickers(417) },
-    { id:'mar', name:'Marruecos',        flag:'🇲🇦', stickers:mkStickers(430) },
-    { id:'nga', name:'Nigeria',          flag:'🇳🇬', stickers:mkStickers(443) },
-    { id:'sen', name:'Senegal',          flag:'🇸🇳', stickers:mkStickers(456) },
-    { id:'tun', name:'Túnez',            flag:'🇹🇳', stickers:mkStickers(469) },
+  { id:'grupoD', name:'Grupo D', teams:[
+    { id:'usa', name:'Estados Unidos', flag:'🇺🇸', stickers:mkStickers('usa') },
+    { id:'par', name:'Paraguay',       flag:'🇵🇾', stickers:mkStickers('par') },
+    { id:'aus', name:'Australia',      flag:'🇦🇺', stickers:mkStickers('aus') },
+    { id:'tur', name:'Turquía',        flag:'🇹🇷', stickers:mkStickers('tur') },
   ]},
-  { id:'afc', name:'🟠 AFC (Asia)', teams:[
-    { id:'ksa', name:'Arabia Saudita', flag:'🇸🇦', stickers:mkStickers(482) },
-    { id:'aus', name:'Australia',      flag:'🇦🇺', stickers:mkStickers(495) },
-    { id:'kor', name:'Corea del Sur',  flag:'🇰🇷', stickers:mkStickers(508) },
-    { id:'idn', name:'Indonesia',      flag:'🇮🇩', stickers:mkStickers(521) },
-    { id:'irn', name:'Irán',           flag:'🇮🇷', stickers:mkStickers(534) },
-    { id:'jpn', name:'Japón',          flag:'🇯🇵', stickers:mkStickers(547) },
-    { id:'jor', name:'Jordania',       flag:'🇯🇴', stickers:mkStickers(560) },
-    { id:'uzb', name:'Uzbekistán',     flag:'🇺🇿', stickers:mkStickers(573) },
+  { id:'grupoE', name:'Grupo E', teams:[
+    { id:'ger', name:'Alemania',       flag:'🇩🇪', stickers:mkStickers('ger') },
+    { id:'cur', name:'Curazao',        flag:'🇨🇼', stickers:mkStickers('cur') },
+    { id:'civ', name:'Costa de Marfil',flag:'🇨🇮', stickers:mkStickers('civ') },
+    { id:'ecu', name:'Ecuador',        flag:'🇪🇨', stickers:mkStickers('ecu') },
   ]},
-  { id:'ofc', name:'🌊 OFC / Playoffs', teams:[
-    { id:'chi', name:'Chile',         flag:'🇨🇱', stickers:mkStickers(586) },
-    { id:'crc', name:'Costa Rica',    flag:'🇨🇷', stickers:mkStickers(599) },
-    { id:'nzl', name:'Nueva Zelanda', flag:'🇳🇿', stickers:mkStickers(612) },
+  { id:'grupoF', name:'Grupo F', teams:[
+    { id:'ned', name:'Países Bajos', flag:'🇳🇱', stickers:mkStickers('ned') },
+    { id:'jpn', name:'Japón',        flag:'🇯🇵', stickers:mkStickers('jpn') },
+    { id:'tun', name:'Túnez',        flag:'🇹🇳', stickers:mkStickers('tun') },
+    { id:'swe', name:'Suecia',       flag:'🇸🇪', stickers:mkStickers('swe') },
+  ]},
+  { id:'grupoG', name:'Grupo G', teams:[
+    { id:'bel', name:'Bélgica',       flag:'🇧🇪', stickers:mkStickers('bel') },
+    { id:'egy', name:'Egipto',        flag:'🇪🇬', stickers:mkStickers('egy') },
+    { id:'irn', name:'Irán',          flag:'🇮🇷', stickers:mkStickers('irn') },
+    { id:'nzl', name:'Nueva Zelanda', flag:'🇳🇿', stickers:mkStickers('nzl') },
+  ]},
+  { id:'grupoH', name:'Grupo H', teams:[
+    { id:'esp', name:'España',        flag:'🇪🇸', stickers:mkStickers('esp') },
+    { id:'cpv', name:'Cabo Verde',    flag:'🇨🇻', stickers:mkStickers('cpv') },
+    { id:'ksa', name:'Arabia Saudita',flag:'🇸🇦', stickers:mkStickers('ksa') },
+    { id:'uru', name:'Uruguay',       flag:'🇺🇾', stickers:mkStickers('uru') },
+  ]},
+  { id:'grupoI', name:'Grupo I', teams:[
+    { id:'fra', name:'Francia', flag:'🇫🇷', stickers:mkStickers('fra') },
+    { id:'irq', name:'Irak',    flag:'🇮🇶', stickers:mkStickers('irq') },
+    { id:'sen', name:'Senegal', flag:'🇸🇳', stickers:mkStickers('sen') },
+    { id:'nor', name:'Noruega', flag:'🇳🇴', stickers:mkStickers('nor') },
+  ]},
+  { id:'grupoJ', name:'Grupo J', teams:[
+    { id:'arg', name:'Argentina', flag:'🇦🇷', stickers:mkStickers('arg') },
+    { id:'alg', name:'Argelia',   flag:'🇩🇿', stickers:mkStickers('alg') },
+    { id:'aut', name:'Austria',   flag:'🇦🇹', stickers:mkStickers('aut') },
+    { id:'jor', name:'Jordania',  flag:'🇯🇴', stickers:mkStickers('jor') },
+  ]},
+  { id:'grupoK', name:'Grupo K', teams:[
+    { id:'por', name:'Portugal',  flag:'🇵🇹', stickers:mkStickers('por') },
+    { id:'cod', name:'RD Congo',  flag:'🇨🇩', stickers:mkStickers('cod') },
+    { id:'uzb', name:'Uzbekistán',flag:'🇺🇿', stickers:mkStickers('uzb') },
+    { id:'col', name:'Colombia',  flag:'🇨🇴', stickers:mkStickers('col') },
+  ]},
+  { id:'grupoL', name:'Grupo L', teams:[
+    { id:'eng', name:'Inglaterra', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', stickers:mkStickers('eng') },
+    { id:'cro', name:'Croacia',    flag:'🇭🇷', stickers:mkStickers('cro') },
+    { id:'gha', name:'Ghana',      flag:'🇬🇭', stickers:mkStickers('gha') },
+    { id:'pan', name:'Panamá',     flag:'🇵🇦', stickers:mkStickers('pan') },
   ]},
 ];
 
@@ -245,7 +257,7 @@ const ALL_IDS = Object.keys(stickerMap);
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'album-mundial-2026-v1';
+const STORAGE_KEY = 'album-mundial-2026-v3';
 let collected = {};
 let openTeams = new Set();
 let currentFilter = 'all';
@@ -330,7 +342,7 @@ function buildTeamCard(sec, team) {
     const btn = document.createElement('button');
     btn.className = 'sticker-btn ' + (collected[st.id] ? 'collected' : 'missing');
     btn.dataset.stickerId = st.id;
-    btn.innerHTML = `<span class="sticker-num">${st.id}</span><span class="sticker-label">${st.label}</span>`;
+    btn.innerHTML = `<span class="sticker-num">${st.num}</span><span class="sticker-label">${st.label}</span>`;
     btn.addEventListener('click', () => toggleSticker(st.id));
     grid.appendChild(btn);
   }
