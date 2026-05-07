@@ -163,8 +163,10 @@
 function mkStickers(teamId) {
   const s = [];
   s.push({ id: teamId + '-1',  num: 1,  label: 'Escudo' });
-  s.push({ id: teamId + '-2',  num: 2,  label: 'Equipo' });
-  for (let i = 1; i <= 18; i++)
+  for (let i = 1; i <= 11; i++)
+    s.push({ id: teamId + '-' + (i + 1), num: i + 1, label: 'Jug.' + i });
+  s.push({ id: teamId + '-13', num: 13, label: 'Equipo' });
+  for (let i = 12; i <= 18; i++)
     s.push({ id: teamId + '-' + (i + 2), num: i + 2, label: 'Jug.' + i });
   return s; // 20 stickers numeradas 1-20
 }
