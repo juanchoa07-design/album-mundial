@@ -114,6 +114,14 @@
       cursor: pointer; font-size: 0.82rem;
     }
     .reset-btn:active { background: rgba(239,68,68,0.1); }
+    .copy-btn {
+      background: none; border: 1px solid rgba(96,165,250,0.45);
+      color: rgba(96,165,250,0.85); border-radius: 8px; padding: 10px 20px;
+      cursor: pointer; font-size: 0.82rem; display: flex; align-items: center;
+      gap: 6px; margin: 0 auto 10px;
+    }
+    .copy-btn:active { background: rgba(96,165,250,0.1); }
+    .copy-btn.copied { border-color: rgba(74,222,128,0.5); color: #4ade80; }
   </style>
 </head>
 <body>
@@ -144,6 +152,7 @@
   <div id="app-body"></div>
 
   <div class="app-footer">
+    <button class="copy-btn" id="copy-btn">📋 Copiar lista de faltantes para WhatsApp</button>
     <button class="reset-btn" id="reset-btn">Reiniciar álbum desde cero</button>
   </div>
 </div>
@@ -338,7 +347,10 @@ function buildTeamCard(sec, team) {
   const grid = document.createElement('div');
   grid.className = 'stickers-grid';
   grid.dataset.gridTeam = team.id;
-  for (const st of team.stickers) {
+  const stickersToShow = currentFilter === 'incomplete'
+    ? team.stickers.filter(st => !collected[st.id])
+    : team.stickers;
+  for (const st of stickersToShow) {
     const btn = document.createElement('button');
     btn.className = 'sticker-btn ' + (collected[st.id] ? 'collected' : 'missing');
     btn.dataset.stickerId = st.id;
@@ -401,10 +413,14 @@ function patchTeamCard(teamId) {
 function toggleSticker(id) {
   collected[id] = !collected[id];
   saveState();
+  updateStats();
+  if (currentFilter === 'incomplete') {
+    render();
+    return;
+  }
   const btn = document.querySelector(`[data-sticker-id="${id}"]`);
   if (btn) btn.className = 'sticker-btn ' + (collected[id] ? 'collected' : 'missing');
   patchTeamCard(stickerMap[id].team.id);
-  updateStats();
 }
 
 function markAll(teamId, state) {
@@ -431,6 +447,31 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
     render();
   });
+});
+
+document.getElementById('copy-btn').addEventListener('click', () => {
+  const lines = [];
+  const total = ALL_IDS.filter(id => !collected[id]).length;
+  lines.push(`🏆 Me faltan ${total} figuritas - Álbum Mundial 2026`);
+  lines.push('');
+  for (const sec of SECTIONS) {
+    for (const team of sec.teams) {
+      const missing = team.stickers.filter(st => !collected[st.id]);
+      if (!missing.length) continue;
+      const nums = missing.map(st => st.num).join(' · ');
+      lines.push(`${team.flag} *${team.name}:* ${nums}`);
+    }
+  }
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ ¡Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 Copiar lista de faltantes para WhatsApp';
+      btn.classList.remove('copied');
+    }, 2500);
+  }).catch(() => alert('No se pudo copiar. Intentá de nuevo.'));
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
