@@ -129,6 +129,7 @@
   <header class="app-header">
     <h1>🏆 Mi Álbum del Mundial 2026</h1>
     <p>Tocá cada figurita cuando la conseguís — se guarda automáticamente</p>
+    <div id="countdown" style="margin-top:8px;font-size:0.8rem;color:rgba(255,215,0,0.85);font-weight:600;letter-spacing:0.03em;"></div>
   </header>
 
   <section class="stats-section">
@@ -485,11 +486,30 @@ document.getElementById('reset-btn').addEventListener('click', () => {
   }
 });
 
+// ─── COUNTDOWN ───────────────────────────────────────────────────────────────
+
+function updateCountdown() {
+  const start = new Date('2026-06-11T00:00:00');
+  const now = new Date();
+  const diff = start - now;
+  const el = document.getElementById('countdown');
+  if (diff <= 0) {
+    el.textContent = '¡El Mundial ya comenzó! ⚽';
+  } else {
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    el.textContent = `⏳ Faltan ${days} días, ${hours}h ${mins}m para el Mundial`;
+  }
+}
+
 // ─── INIT ────────────────────────────────────────────────────────────────────
 
 loadState();
 render();
 updateStats();
+updateCountdown();
+setInterval(updateCountdown, 60000);
 </script>
 </body>
 </html>
