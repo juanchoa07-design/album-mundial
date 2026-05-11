@@ -7,6 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Mi Álbum del Mundial 2026</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body {
@@ -125,6 +128,29 @@
     }
     .copy-btn:active { background: rgba(96,165,250,0.1); }
     .copy-btn.copied { border-color: rgba(74,222,128,0.5); color: #4ade80; }
+    .auth-bar {
+      padding: 7px 14px; background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; flex-wrap: wrap; min-height: 40px;
+    }
+    .auth-hint { font-size: 0.71rem; color: rgba(255,255,255,0.35); }
+    .google-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: #fff; color: #333; border: none; border-radius: 6px;
+      padding: 5px 12px; font-size: 0.76rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap;
+    }
+    .google-btn:active { background: #f0f0f0; }
+    .user-photo { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+    .user-name { font-size: 0.76rem; color: rgba(255,255,255,0.65); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sync-ok { font-size: 0.65rem; color: rgba(74,222,128,0.6); }
+    .logout-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.13);
+      color: rgba(255,255,255,0.35); border-radius: 5px;
+      padding: 3px 9px; font-size: 0.68rem; cursor: pointer;
+    }
+    .logout-btn:active { background: rgba(255,255,255,0.05); }
   </style>
 </head>
 <body>
@@ -134,6 +160,8 @@
     <p>Tocá cada figurita cuando la conseguís — se guarda automáticamente</p>
     <div id="countdown" style="margin-top:8px;font-size:0.8rem;color:rgba(255,215,0,0.85);font-weight:600;letter-spacing:0.03em;"></div>
   </header>
+
+  <div id="auth-bar" class="auth-bar"></div>
 
   <section class="stats-section">
     <div class="stats-row">
@@ -162,6 +190,98 @@
 </div>
 
 <script>
+// ─── FIREBASE ────────────────────────────────────────────────────────────────
+
+const FIREBASE_CONFIG = {
+  apiKey:            "REEMPLAZAR",
+  authDomain:        "REEMPLAZAR.firebaseapp.com",
+  projectId:         "REEMPLAZAR",
+  storageBucket:     "REEMPLAZAR.firebasestorage.app",
+  messagingSenderId: "REEMPLAZAR",
+  appId:             "REEMPLAZAR"
+};
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+let currentUser = null;
+
+function updateAuthUI(user) {
+  const bar = document.getElementById('auth-bar');
+  bar.innerHTML = '';
+  if (!user) {
+    const hint = document.createElement('span');
+    hint.className = 'auth-hint';
+    hint.textContent = 'Iniciá sesión para sincronizar en todos tus dispositivos';
+    const btn = document.createElement('button');
+    btn.className = 'google-btn';
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Entrar con Google`;
+    btn.addEventListener('click', signIn);
+    bar.appendChild(hint);
+    bar.appendChild(btn);
+  } else {
+    if (user.photoURL) {
+      const img = document.createElement('img');
+      img.className = 'user-photo';
+      img.src = user.photoURL;
+      img.alt = '';
+      bar.appendChild(img);
+    }
+    const nameEl = document.createElement('span');
+    nameEl.className = 'user-name';
+    nameEl.textContent = (user.displayName || 'Usuario').split(' ')[0];
+    bar.appendChild(nameEl);
+    const syncEl = document.createElement('span');
+    syncEl.className = 'sync-ok';
+    syncEl.textContent = '✓ Sincronizado';
+    bar.appendChild(syncEl);
+    const logoutBtn = document.createElement('button');
+    logoutBtn.className = 'logout-btn';
+    logoutBtn.textContent = 'Cerrar sesión';
+    logoutBtn.addEventListener('click', signOut);
+    bar.appendChild(logoutBtn);
+  }
+}
+
+function signIn() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(e => {
+    if (e.code !== 'auth/popup-closed-by-user')
+      showToast('No se pudo iniciar sesión. Intentá de nuevo.');
+  });
+}
+
+function signOut() {
+  if (confirm('¿Cerrar sesión?\nTu progreso quedará guardado en la nube.'))
+    auth.signOut();
+}
+
+async function loadFromFirestore(uid) {
+  try {
+    const doc = await db.collection('users').doc(uid).get();
+    if (!doc.exists) {
+      const localCollected = collected; // ya cargado desde localStorage
+      const count = Object.values(localCollected).filter(Boolean).length;
+      await db.collection('users').doc(uid).set({ collected: localCollected });
+      if (count > 0) showToast(`✅ Se importaron ${count} figuritas de este dispositivo`);
+    } else {
+      collected = doc.data().collected || {};
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ collected })); } catch(e) {}
+    }
+  } catch(e) {
+    console.error('Firestore:', e);
+    // Seguimos con los datos de localStorage
+  }
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0d2137;border:1px solid rgba(74,222,128,0.5);color:#4ade80;padding:10px 18px;border-radius:10px;font-size:0.82rem;z-index:9999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.4);pointer-events:none;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
 function mkStickers(teamId) {
@@ -286,6 +406,9 @@ function loadState() {
 
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ collected })); } catch(e) {}
+  if (currentUser) {
+    db.collection('users').doc(currentUser.uid).set({ collected }).catch(e => console.error('Save:', e));
+  }
 }
 
 // ─── STATS ───────────────────────────────────────────────────────────────────
@@ -508,11 +631,22 @@ function updateCountdown() {
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 
-loadState();
+loadState();       // Carga localStorage inmediatamente (sin esperar Firebase)
+updateAuthUI(null);
 render();
 updateStats();
 updateCountdown();
 setInterval(updateCountdown, 60000);
+
+auth.onAuthStateChanged(async (user) => {
+  currentUser = user;
+  updateAuthUI(user);
+  if (user) {
+    await loadFromFirestore(user.uid);
+    render();
+    updateStats();
+  }
+});
 </script>
 </body>
 </html>
