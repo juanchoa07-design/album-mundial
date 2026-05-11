@@ -156,6 +156,23 @@
       padding: 3px 9px; font-size: 0.68rem; cursor: pointer;
     }
     .logout-btn:active { background: rgba(255,255,255,0.05); }
+    .share-btn {
+      background: none; border: 1px solid rgba(96,165,250,0.35);
+      color: rgba(96,165,250,0.75); border-radius: 6px;
+      padding: 3px 10px; font-size: 0.68rem; cursor: pointer;
+    }
+    .share-btn:active { background: rgba(96,165,250,0.08); }
+    .viewer-banner {
+      background: rgba(96,165,250,0.08); border-bottom: 1px solid rgba(96,165,250,0.2);
+      padding: 8px 16px; display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; font-size: 0.78rem; color: rgba(255,255,255,0.65);
+    }
+    .viewer-banner.hidden { display: none; }
+    .viewer-back-btn {
+      background: none; border: 1px solid rgba(96,165,250,0.4);
+      color: rgba(96,165,250,0.8); border-radius: 6px;
+      padding: 4px 10px; font-size: 0.7rem; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    }
     /* Modal */
     .auth-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.7);
@@ -198,6 +215,11 @@
   </header>
 
   <div id="auth-bar" class="auth-bar"></div>
+
+  <div id="viewer-banner" class="viewer-banner hidden">
+    <span id="viewer-name">📋 Álbum compartido</span>
+    <button class="viewer-back-btn" id="viewer-back-btn">Ver mi álbum</button>
+  </div>
 
   <div id="auth-overlay" class="auth-overlay hidden">
     <div class="auth-card">
@@ -256,6 +278,7 @@ firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 const db   = firebase.database();
 let currentUser = null;
+let viewerUid = null;
 
 function updateAuthUI(user) {
   const bar = document.getElementById('auth-bar');
@@ -292,6 +315,14 @@ function updateAuthUI(user) {
     syncEl.className = 'sync-ok';
     syncEl.textContent = '✓ Sincronizado';
     bar.appendChild(syncEl);
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'share-btn';
+    shareBtn.textContent = '🔗 Compartir';
+    shareBtn.addEventListener('click', () => {
+      const url = location.origin + location.pathname + '?uid=' + user.uid;
+      navigator.clipboard.writeText(url).then(() => showToast('✅ Link copiado. Mandáselo a tu amigo.'));
+    });
+    bar.appendChild(shareBtn);
     const logoutBtn = document.createElement('button');
     logoutBtn.className = 'logout-btn';
     logoutBtn.textContent = 'Cerrar sesión';
@@ -336,8 +367,36 @@ async function loadFromFirestore(uid) {
     } else if (newCount > 0) {
       showToast(`✅ Se agregaron ${newCount} figuritas nuevas a tu cuenta`);
     }
+    if (currentUser?.displayName)
+      db.ref('users/' + uid + '/displayName').set(currentUser.displayName).catch(() => {});
   } catch(e) {
     console.error('Database:', e);
+  }
+}
+
+async function loadViewerMode(uid) {
+  const banner = document.getElementById('viewer-banner');
+  const nameEl = document.getElementById('viewer-name');
+  banner.classList.remove('hidden');
+  document.getElementById('viewer-back-btn').addEventListener('click', () => {
+    location.href = location.origin + location.pathname;
+  });
+  nameEl.textContent = '⏳ Cargando álbum...';
+  try {
+    const snap = await db.ref('users/' + uid).get();
+    if (!snap.exists()) { nameEl.textContent = '❌ Álbum no encontrado'; return; }
+    const data = snap.val();
+    collected = data.collected || {};
+    nameEl.textContent = data.displayName ? `📋 Faltantes de ${data.displayName}` : '📋 Álbum compartido';
+    currentFilter = 'incomplete';
+    document.querySelectorAll('.filter-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.filter === 'incomplete')
+    );
+    render();
+    updateStats();
+  } catch(e) {
+    nameEl.textContent = '❌ No se pudo cargar el álbum';
+    console.error(e);
   }
 }
 
@@ -614,6 +673,7 @@ function patchTeamCard(teamId) {
 }
 
 function toggleSticker(id) {
+  if (viewerUid) return;
   collected[id] = !collected[id];
   saveState();
   updateStats();
@@ -627,6 +687,7 @@ function toggleSticker(id) {
 }
 
 function markAll(teamId, state) {
+  if (viewerUid) return;
   const info = Object.values(stickerMap).find(v => v.team.id === teamId);
   if (!info) return;
   for (const st of info.team.stickers) collected[st.id] = state;
@@ -705,16 +766,23 @@ function updateCountdown() {
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 
-loadState();       // Carga localStorage inmediatamente (sin esperar Firebase)
+loadState();
 updateAuthUI(null);
 render();
 updateStats();
 updateCountdown();
 setInterval(updateCountdown, 60000);
 
+const urlUid = new URLSearchParams(location.search).get('uid');
+if (urlUid) {
+  viewerUid = urlUid;
+  loadViewerMode(urlUid);
+}
+
 auth.onAuthStateChanged(async (user) => {
   currentUser = user;
   updateAuthUI(user);
+  if (viewerUid) return;
   if (user) {
     await loadFromFirestore(user.uid);
     render();
