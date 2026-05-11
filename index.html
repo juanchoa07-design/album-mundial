@@ -77,6 +77,12 @@
       border-radius: 10px; border: 1px solid rgba(255,255,255,0.07); overflow: hidden;
     }
     .team-card[data-complete="true"] { border-color: rgba(74,222,128,0.3); }
+    .team-card.complete-in-faltan { background: rgba(74,222,128,0.04); opacity: 0.55; }
+    .team-complete-badge {
+      font-size: 0.58rem; font-weight: 700; color: #4ade80;
+      background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3);
+      border-radius: 4px; padding: 2px 7px; flex-shrink: 0; letter-spacing: 0.02em;
+    }
     .team-toggle {
       display: flex; align-items: center; padding: 11px 14px; cursor: pointer;
       gap: 10px; -webkit-tap-highlight-color: transparent; user-select: none;
@@ -497,8 +503,10 @@ function buildTeamCard(sec, team) {
   const isOpen = openTeams.has(team.id);
   const complete = done === total;
 
+  const completeInFaltan = complete && currentFilter === 'incomplete';
+
   const card = document.createElement('div');
-  card.className = 'team-card' + (isOpen ? ' open' : '');
+  card.className = 'team-card' + (isOpen ? ' open' : '') + (completeInFaltan ? ' complete-in-faltan' : '');
   card.dataset.teamId = team.id;
   if (complete) card.dataset.complete = 'true';
 
@@ -515,6 +523,7 @@ function buildTeamCard(sec, team) {
       <div class="team-mini-bar"><div class="team-mini-fill" style="width:${pct}%"></div></div>
       <div class="team-pct">${pct}%</div>
     </div>
+    ${completeInFaltan ? '<span class="team-complete-badge">✓ Lista</span>' : ''}
     <span class="team-chevron">▼</span>
   `;
   toggle.addEventListener('click', () => toggleTeam(team.id));
@@ -537,7 +546,7 @@ function buildTeamCard(sec, team) {
   const grid = document.createElement('div');
   grid.className = 'stickers-grid';
   grid.dataset.gridTeam = team.id;
-  const stickersToShow = currentFilter === 'incomplete'
+  const stickersToShow = (currentFilter === 'incomplete' && !complete)
     ? team.stickers.filter(st => !collected[st.id])
     : team.stickers;
   for (const st of stickersToShow) {
@@ -562,7 +571,11 @@ function render() {
   for (const sec of SECTIONS) {
     let teams = sec.teams;
     if (q) teams = teams.filter(t => t.name.toLowerCase().includes(q));
-    if (currentFilter === 'incomplete') teams = teams.filter(t => { const {done,total} = teamStats(t); return done < total; });
+    if (currentFilter === 'incomplete') {
+      const inc  = teams.filter(t => teamStats(t).done < teamStats(t).total);
+      const comp = teams.filter(t => teamStats(t).done === teamStats(t).total);
+      teams = [...inc, ...comp];
+    }
     if (currentFilter === 'complete')   teams = teams.filter(t => { const {done,total} = teamStats(t); return done === total; });
     if (!teams.length) continue;
     any = true;
