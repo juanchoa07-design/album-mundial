@@ -9,7 +9,7 @@
   <title>Mi Álbum del Mundial 2026</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body {
@@ -193,17 +193,18 @@
 // ─── FIREBASE ────────────────────────────────────────────────────────────────
 
 const FIREBASE_CONFIG = {
-  apiKey:            "REEMPLAZAR",
-  authDomain:        "REEMPLAZAR.firebaseapp.com",
-  projectId:         "REEMPLAZAR",
-  storageBucket:     "REEMPLAZAR.firebasestorage.app",
-  messagingSenderId: "REEMPLAZAR",
-  appId:             "REEMPLAZAR"
+  apiKey:            "AIzaSyANpLiPz5yJl1JViEJNVv8dLypTFBZwFGU",
+  authDomain:        "album-app-b39b4.firebaseapp.com",
+  databaseURL:       "https://album-app-b39b4-default-rtdb.firebaseio.com",
+  projectId:         "album-app-b39b4",
+  storageBucket:     "album-app-b39b4.firebasestorage.app",
+  messagingSenderId: "847811547361",
+  appId:             "1:847811547361:web:7762eea1c2eff2682c67a0"
 };
 
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
-const db   = firebase.firestore();
+const db   = firebase.database();
 let currentUser = null;
 
 function updateAuthUI(user) {
@@ -258,18 +259,18 @@ function signOut() {
 
 async function loadFromFirestore(uid) {
   try {
-    const doc = await db.collection('users').doc(uid).get();
-    if (!doc.exists) {
+    const snap = await db.ref('users/' + uid).get();
+    if (!snap.exists()) {
       const localCollected = collected; // ya cargado desde localStorage
       const count = Object.values(localCollected).filter(Boolean).length;
-      await db.collection('users').doc(uid).set({ collected: localCollected });
+      await db.ref('users/' + uid).set({ collected: localCollected });
       if (count > 0) showToast(`✅ Se importaron ${count} figuritas de este dispositivo`);
     } else {
-      collected = doc.data().collected || {};
+      collected = snap.val().collected || {};
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ collected })); } catch(e) {}
     }
   } catch(e) {
-    console.error('Firestore:', e);
+    console.error('Database:', e);
     // Seguimos con los datos de localStorage
   }
 }
@@ -407,7 +408,7 @@ function loadState() {
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ collected })); } catch(e) {}
   if (currentUser) {
-    db.collection('users').doc(currentUser.uid).set({ collected }).catch(e => console.error('Save:', e));
+    db.ref('users/' + currentUser.uid).set({ collected }).catch(e => console.error('Save:', e));
   }
 }
 
