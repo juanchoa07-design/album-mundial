@@ -138,7 +138,7 @@
       padding: 6px 14px; background: rgba(255,255,255,0.02);
       border-bottom: 1px solid rgba(255,255,255,0.06);
       display: flex; align-items: center; justify-content: center;
-      gap: 10px; min-height: 38px;
+      gap: 10px; min-height: 38px; flex-wrap: wrap;
     }
     .auth-bar-login-btn {
       display: flex; align-items: center; gap: 5px;
@@ -173,6 +173,29 @@
       color: rgba(96,165,250,0.8); border-radius: 6px;
       padding: 4px 10px; font-size: 0.7rem; cursor: pointer; white-space: nowrap; flex-shrink: 0;
     }
+    .viewer-match-btn {
+      background: rgba(251,146,60,0.12); border: 1px solid rgba(251,146,60,0.4);
+      color: #fb923c; border-radius: 6px;
+      padding: 4px 10px; font-size: 0.7rem; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    }
+    .viewer-match-btn:active { background: rgba(251,146,60,0.2); }
+    .import-btn {
+      background: none; border: 1px solid rgba(251,146,60,0.4);
+      color: rgba(251,146,60,0.8); border-radius: 8px; padding: 10px 20px;
+      cursor: pointer; font-size: 0.82rem; display: flex; align-items: center;
+      gap: 6px; margin: 0 auto 10px;
+    }
+    .import-btn:active { background: rgba(251,146,60,0.1); }
+    .import-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px); }
+    .import-overlay.hidden { display:none; }
+    .import-card { background:linear-gradient(145deg,#0f2744,#0d1b2a);border:1px solid rgba(251,146,60,0.25);border-radius:20px;padding:28px 24px;max-width:360px;width:100%;position:relative; }
+    .import-card h3 { color:#fb923c;font-size:1rem;font-weight:800;margin:0 0 6px; }
+    .import-card p { font-size:0.74rem;color:rgba(255,255,255,0.4);margin:0 0 14px;line-height:1.55; }
+    .import-textarea { width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#e2e8f0;font-size:0.78rem;padding:10px 12px;outline:none;resize:vertical;min-height:130px;font-family:inherit;box-sizing:border-box; }
+    .import-textarea:focus { border-color:rgba(251,146,60,0.5); }
+    .import-confirm-btn { width:100%;background:rgba(251,146,60,0.15);border:1px solid rgba(251,146,60,0.4);color:#fb923c;border-radius:10px;padding:11px;font-size:0.88rem;font-weight:700;cursor:pointer;margin-top:12px; }
+    .import-confirm-btn:active { background:rgba(251,146,60,0.25); }
+    .import-cancel-btn { width:100%;background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.35);border-radius:10px;padding:8px;font-size:0.78rem;cursor:pointer;margin-top:8px; }
     /* Modal */
     .auth-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.7);
@@ -204,15 +227,168 @@
     }
     .google-btn-big:active { transform: scale(0.97); background: #f5f5f5; }
     .auth-card-note { font-size: 0.65rem; color: rgba(255,255,255,0.2); margin: 14px 0 0; }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────────── */
+    .app-header { position: relative; }
+    .hamburger-btn {
+      position: absolute; left: 14px; top: 16px;
+      background: none; border: none; color: rgba(255,255,255,0.6);
+      font-size: 1.35rem; cursor: pointer; padding: 4px; line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hamburger-btn:active { color: #ffd700; }
+    .sidebar-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 200; backdrop-filter: blur(2px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; height: 100dvh; width: 275px;
+      background: linear-gradient(180deg, #0f2744 0%, #09182a 100%);
+      border-right: 1px solid rgba(255,215,0,0.12);
+      z-index: 201; transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .sidebar.open { transform: translateX(0); box-shadow: 6px 0 32px rgba(0,0,0,0.55); }
+    .sidebar-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 16px 15px; border-bottom: 1px solid rgba(255,215,0,0.12); flex-shrink: 0;
+    }
+    .sidebar-head-title { font-size: 0.88rem; font-weight: 800; color: #ffd700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .sidebar-close-btn { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 1rem; cursor: pointer; padding: 4px; }
+    .sidebar-close-btn:hover { color: rgba(255,255,255,0.7); }
+    .sidebar-section { padding: 12px 0 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .sidebar-section:last-child { border-bottom: none; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 24px; }
+    .sidebar-label {
+      font-size: 0.58rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: rgba(255,255,255,0.22);
+      padding: 0 16px 4px;
+    }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 16px; cursor: pointer; font-size: 0.85rem;
+      color: rgba(255,255,255,0.65); border: none; background: none;
+      width: 100%; text-align: left; -webkit-tap-highlight-color: transparent;
+      transition: background 0.12s, color 0.12s;
+    }
+    .sidebar-item:active { background: rgba(255,255,255,0.07); }
+    .sidebar-item.active { color: #ffd700; background: rgba(255,215,0,0.08); font-weight: 600; }
+    .sidebar-icon { font-size: 1rem; width: 22px; text-align: center; flex-shrink: 0; }
+    .sidebar-item.danger { color: rgba(239,68,68,0.65); }
+    .sidebar-item.danger:active { background: rgba(239,68,68,0.08); }
+    .sidebar-user-row {
+      display: flex; align-items: center; gap: 10px; padding: 8px 16px 4px;
+    }
+    .sidebar-user-photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .sidebar-user-name { font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.8); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .sidebar-sync { font-size: 0.63rem; color: rgba(74,222,128,0.7); }
+
+    /* ── Responsive ──────────────────────────────────────────────────────────── */
+    @media (max-width: 400px) {
+      .app-header { padding: 11px 12px 9px; }
+      .app-header h1 { font-size: 1.15rem; }
+      .app-header p { font-size: 0.72rem; }
+      #countdown { font-size: 0.7rem !important; }
+
+      .auth-bar { gap: 6px; padding: 5px 10px; }
+      .sync-ok { display: none; }
+      .user-name { max-width: 80px; font-size: 0.72rem; }
+      .share-btn { padding: 3px 8px; font-size: 0.64rem; }
+      .logout-btn { padding: 3px 7px; font-size: 0.64rem; }
+      .auth-bar-login-btn { font-size: 0.68rem; padding: 4px 10px; }
+
+      .controls-section { flex-wrap: wrap; padding: 8px 10px; gap: 6px; }
+      #search-input { width: 100%; flex: none; font-size: 0.85rem; }
+      .filters { width: 100%; gap: 4px; }
+      .filter-btn { flex: 1; text-align: center; padding: 7px 4px; font-size: 0.71rem; }
+
+      .section-title { padding: 10px 12px 5px; font-size: 0.68rem; }
+      .team-card { margin: 3px 8px; }
+      .team-toggle { padding: 9px 10px; gap: 7px; }
+      .team-flag { font-size: 1.1rem; width: 24px; }
+      .team-name { font-size: 0.84rem; }
+      .team-progress-text { font-size: 0.63rem; }
+
+      .stickers-panel { padding: 0 8px 10px; }
+      .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 4px; }
+      .sticker-num { font-size: 0.75rem; }
+      .sticker-label { font-size: 0.48rem; }
+
+      .viewer-banner { flex-wrap: wrap; row-gap: 6px; padding: 8px 12px; font-size: 0.73rem; }
+      #viewer-name { width: 100%; }
+
+      .app-footer { padding: 0 10px; }
+      .copy-btn, .import-btn, .reset-btn { width: 100%; justify-content: center; font-size: 0.78rem; }
+
+      .import-card { padding: 22px 18px; }
+      .auth-card { padding: 28px 20px; }
+    }
+
+    @media (max-width: 320px) {
+      .app-header h1 { font-size: 0.98rem; }
+      .app-header p { font-size: 0.67rem; }
+      #countdown { font-size: 0.62rem !important; }
+      .stat-number { font-size: 1.2rem; }
+      .stat-label { font-size: 0.6rem; }
+      .share-btn { display: none; }
+      .stickers-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 3px; }
+      .team-mini-bar-wrap { display: none; }
+      .filter-btn { font-size: 0.66rem; padding: 6px 3px; }
+    }
   </style>
 </head>
 <body>
 <div class="main-wrap">
   <header class="app-header">
+    <button class="hamburger-btn" id="hamburger-btn" aria-label="Menú">☰</button>
     <h1>🏆 Mi Álbum del Mundial 2026</h1>
     <p>Tocá cada figurita cuando la conseguís — se guarda automáticamente</p>
     <div id="countdown" style="margin-top:8px;font-size:0.8rem;color:rgba(255,215,0,0.85);font-weight:600;letter-spacing:0.03em;"></div>
   </header>
+
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-head">
+      <span class="sidebar-head-title">⚽ Menú</span>
+      <button class="sidebar-close-btn" id="sidebar-close">✕</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Mi cuenta</div>
+      <div id="sidebar-auth"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Filtrar álbum</div>
+      <button class="sidebar-item active" data-sidebar-filter="all">
+        <span class="sidebar-icon">🃏</span> Todo el álbum
+      </button>
+      <button class="sidebar-item" data-sidebar-filter="incomplete">
+        <span class="sidebar-icon">🔴</span> Me faltan
+      </button>
+      <button class="sidebar-item" data-sidebar-filter="complete">
+        <span class="sidebar-icon">✅</span> Listas completas
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Herramientas</div>
+      <button class="sidebar-item" id="sidebar-import">
+        <span class="sidebar-icon">📥</span> Importar lista de faltantes
+      </button>
+      <button class="sidebar-item" id="sidebar-copy">
+        <span class="sidebar-icon">📋</span> Copiar faltantes para WhatsApp
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <button class="sidebar-item danger" id="sidebar-reset">
+        <span class="sidebar-icon">🗑</span> Reiniciar álbum desde cero
+      </button>
+    </div>
+  </aside>
 
   <div id="auth-bar" class="auth-bar"></div>
 
@@ -257,7 +433,19 @@
 
   <div class="app-footer">
     <button class="copy-btn" id="copy-btn">📋 Copiar lista de faltantes para WhatsApp</button>
+    <button class="import-btn" id="import-btn">📥 Importar lista de faltantes</button>
     <button class="reset-btn" id="reset-btn">Reiniciar álbum desde cero</button>
+  </div>
+
+  <div id="import-overlay" class="import-overlay hidden">
+    <div class="import-card">
+      <button class="auth-card-close" id="import-close">✕</button>
+      <h3>📥 Importar faltantes</h3>
+      <p>Pegá tu lista de figuritas que te faltan. La app va a marcar todo lo que tenés y dejar sin marcar lo que falta.<br><br>Funciona con el formato que genera esta app (o cualquier lista con nombre de equipo y números).</p>
+      <textarea class="import-textarea" id="import-textarea" placeholder="🇦🇷 *Argentina:* 3 · 7 · 15&#10;🇧🇷 *Brasil:* 1 · 4 · 20&#10;🇫🇷 *Francia:* 2 · 9&#10;..."></textarea>
+      <button class="import-confirm-btn" id="import-confirm">Importar álbum</button>
+      <button class="import-cancel-btn" id="import-cancel">Cancelar</button>
+    </div>
   </div>
 </div>
 
@@ -279,8 +467,10 @@ const auth = firebase.auth();
 const db   = firebase.database();
 let currentUser = null;
 let viewerUid = null;
+let myCollected = {};
 
 function updateAuthUI(user) {
+  updateSidebarAuth(user);
   const bar = document.getElementById('auth-bar');
   bar.innerHTML = '';
 
@@ -703,14 +893,101 @@ function markAll(teamId, state) {
 
 // ─── EVENTS ──────────────────────────────────────────────────────────────────
 
+// ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+function updateSidebarAuth(user) {
+  const el = document.getElementById('sidebar-auth');
+  if (!el) return;
+  el.innerHTML = '';
+  if (!user) {
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-item';
+    btn.innerHTML = '<span class="sidebar-icon">☁️</span> Sincronizar álbum';
+    btn.addEventListener('click', () => {
+      closeSidebar();
+      document.getElementById('auth-overlay').classList.remove('hidden');
+    });
+    el.appendChild(btn);
+  } else {
+    const row = document.createElement('div');
+    row.className = 'sidebar-user-row';
+    if (user.photoURL) {
+      const img = document.createElement('img');
+      img.className = 'sidebar-user-photo'; img.src = user.photoURL; img.alt = '';
+      row.appendChild(img);
+    }
+    const info = document.createElement('div');
+    info.style.minWidth = '0';
+    info.innerHTML = `<div class="sidebar-user-name">${(user.displayName || 'Usuario').split(' ')[0]}</div>
+                      <div class="sidebar-sync">✓ Sincronizado</div>`;
+    row.appendChild(info);
+    el.appendChild(row);
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'sidebar-item';
+    shareBtn.innerHTML = '<span class="sidebar-icon">🔗</span> Compartir mi álbum';
+    shareBtn.addEventListener('click', () => {
+      const url = location.origin + location.pathname + '?uid=' + user.uid;
+      navigator.clipboard.writeText(url).then(() => { closeSidebar(); showToast('✅ Link copiado. Mandáselo a tu amigo.'); });
+    });
+    el.appendChild(shareBtn);
+    const logoutBtn = document.createElement('button');
+    logoutBtn.className = 'sidebar-item danger';
+    logoutBtn.innerHTML = '<span class="sidebar-icon">🚪</span> Cerrar sesión';
+    logoutBtn.addEventListener('click', () => { closeSidebar(); signOut(); });
+    el.appendChild(logoutBtn);
+  }
+}
+
+document.getElementById('hamburger-btn').addEventListener('click', openSidebar);
+document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
+document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+
+document.querySelectorAll('[data-sidebar-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setFilter(btn.dataset.sidebarFilter);
+    closeSidebar();
+  });
+});
+
+document.getElementById('sidebar-import').addEventListener('click', () => {
+  closeSidebar();
+  document.getElementById('import-overlay').classList.remove('hidden');
+});
+document.getElementById('sidebar-copy').addEventListener('click', () => {
+  closeSidebar();
+  document.getElementById('copy-btn').click();
+});
+document.getElementById('sidebar-reset').addEventListener('click', () => {
+  closeSidebar();
+  document.getElementById('reset-btn').click();
+});
+
+// ─── FILTROS ─────────────────────────────────────────────────────────────────
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.filter === f)
+  );
+  document.querySelectorAll('[data-sidebar-filter]').forEach(b =>
+    b.classList.toggle('active', b.dataset.sidebarFilter === f)
+  );
+  render();
+}
+
 document.getElementById('search-input').addEventListener('input', render);
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentFilter = btn.dataset.filter;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === btn));
-    render();
-  });
+  btn.addEventListener('click', () => setFilter(btn.dataset.filter));
 });
 
 document.getElementById('copy-btn').addEventListener('click', () => {
@@ -736,6 +1013,76 @@ document.getElementById('copy-btn').addEventListener('click', () => {
       btn.classList.remove('copied');
     }, 2500);
   }).catch(() => alert('No se pudo copiar. Intentá de nuevo.'));
+});
+
+function normName(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function parseAndImport(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // Build lookup: normalized name → team
+  const teamByName = {};
+  for (const sec of SECTIONS)
+    for (const team of sec.teams)
+      teamByName[normName(team.name)] = team;
+
+  const missingByTeam = {};
+  for (const line of lines) {
+    const lineNorm = normName(line);
+    let matched = null;
+    for (const [name, team] of Object.entries(teamByName)) {
+      if (lineNorm.includes(name)) { matched = team; break; }
+    }
+    if (!matched) continue;
+    const nums = line.match(/\d+/g) || [];
+    missingByTeam[matched.id] = new Set(nums.map(String));
+  }
+
+  if (!Object.keys(missingByTeam).length) return 0;
+
+  for (const sec of SECTIONS) {
+    for (const team of sec.teams) {
+      if (team.id in missingByTeam) {
+        const missingNums = missingByTeam[team.id];
+        for (const st of team.stickers)
+          collected[st.id] = !missingNums.has(String(st.num));
+      } else {
+        // Equipo no en la lista = todos los tengo
+        for (const st of team.stickers)
+          collected[st.id] = true;
+      }
+    }
+  }
+
+  saveState();
+  render();
+  updateStats();
+  return Object.values(collected).filter(Boolean).length;
+}
+
+// ── Import modal ──────────────────────────────────────────────────────────────
+document.getElementById('import-btn').addEventListener('click', () => {
+  document.getElementById('import-overlay').classList.remove('hidden');
+});
+['import-close', 'import-cancel'].forEach(id =>
+  document.getElementById(id).addEventListener('click', () =>
+    document.getElementById('import-overlay').classList.add('hidden'))
+);
+document.getElementById('import-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('import-overlay'))
+    document.getElementById('import-overlay').classList.add('hidden');
+});
+document.getElementById('import-confirm').addEventListener('click', () => {
+  if (viewerUid) return;
+  const text = document.getElementById('import-textarea').value.trim();
+  if (!text) { showToast('Pegá una lista primero'); return; }
+  const got = parseAndImport(text);
+  if (!got) { showToast('No se reconoció ningún equipo. Verificá el formato.'); return; }
+  document.getElementById('import-overlay').classList.add('hidden');
+  document.getElementById('import-textarea').value = '';
+  showToast(`✅ ¡Listo! Tenés ${got} figuritas marcadas.`);
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
