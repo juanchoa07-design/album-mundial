@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git show *)"
+      "Bash(git show *)",
+      "Bash(ls \"c:\\\\Users\\\\juanc\\\\OneDrive\\\\Documentos\\\\GitHub\\\\album-mundial\\\\\" | Select-Object Name)",
+      "Read(//c/Users/juanc/OneDrive/Documentos/GitHub/**)",
+      "PowerShell(Rename-Item \"c:\\\\Users\\\\juanc\\\\OneDrive\\\\Documentos\\\\GitHub\\\\album-mundial\\\\icon-192.png.png\" \"icon-192.png\")",
+      "PowerShell(Rename-Item \"c:\\\\Users\\\\juanc\\\\OneDrive\\\\Documentos\\\\GitHub\\\\album-mundial\\\\icon-512.png.png\" \"icon-512.png\")"
     ]
   }
 }
