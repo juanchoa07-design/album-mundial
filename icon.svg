@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#1a3550"/>
+      <stop offset="100%" stop-color="#0a1828"/>
+    </linearGradient>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe566"/>
+      <stop offset="100%" stop-color="#c8900a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo redondeado -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- Copa: cuerpo -->
+  <path d="M175 78h162l-24 178q-14 62-57 86q-43-24-57-86z" fill="url(#g)"/>
+
+  <!-- Copa: asa izquierda -->
+  <path d="M175 100 Q102 100 102 174 Q102 244 188 252"
+        fill="none" stroke="url(#g)" stroke-width="24"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Copa: asa derecha -->
+  <path d="M337 100 Q410 100 410 174 Q410 244 324 252"
+        fill="none" stroke="url(#g)" stroke-width="24"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Copa: tallo -->
+  <rect x="234" y="342" width="44" height="66" rx="4" fill="url(#g)"/>
+
+  <!-- Copa: base -->
+  <rect x="158" y="404" width="196" height="38" rx="14" fill="url(#g)"/>
+
+  <!-- Estrella decorativa dentro de la copa -->
+  <polygon
+    points="256,120 267,153 302,153 275,173 285,206 256,186 227,206 237,173 210,153 245,153"
+    fill="#0d1b2a" opacity="0.35"/>
+</svg>
